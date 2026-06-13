@@ -13,10 +13,11 @@ const EditorPage = () => {
   const [socketInstance, setSocketInstance] = useState(null);
   const [joined, setJoined] = useState(false);
   const [username, setUsername] = useState(Location?.state?.username || localStorage.getItem('username') || '');
-  const [connectionStatus, setConnectionStatus] = useState('disconnected'); 
+  const [connectionStatus, setConnectionStatus] = useState('connecting'); 
   const { roomId } = useParams();
   const[clients, setClients]=useState([]);
   const connectErrorShownRef = useRef(false);
+  const intentionalDisconnectRef = useRef(false);
   const lastJoinToastRef = useRef(null);
   const joinAttemptsRef = useRef(0);
   const joinRetryTimeoutRef = useRef(null);
@@ -76,6 +77,7 @@ const EditorPage = () => {
 
       socketRef.current.on('connect', () => {
         console.log('socket connected (client)', socketRef.current.id);
+        intentionalDisconnectRef.current = false;
         setConnectionStatus('connected');
         if (connectErrorShownRef.current) {
           toast.success('Connected to server');
@@ -112,6 +114,10 @@ const EditorPage = () => {
 
       
       socketRef.current.on('disconnect', (reason) => {
+        if (intentionalDisconnectRef.current || reason === 'io client disconnect') {
+          intentionalDisconnectRef.current = false;
+          return;
+        }
         console.warn('socket disconnected', reason);
         setConnectionStatus('disconnected');
         setJoined(false);
@@ -187,6 +193,7 @@ const EditorPage = () => {
         socketRef.current.off(ACTIONS.DISCONNECTED);
         socketRef.current.off('connect_error');
         try { __anySocketHandler && socketRef.current.offAny && socketRef.current.offAny(__anySocketHandler); } catch (e) {}
+        intentionalDisconnectRef.current = true;
         socketRef.current.disconnect && socketRef.current.disconnect();
         socketRef.current = null;
       }
@@ -251,6 +258,7 @@ const EditorPage = () => {
     const uname = username;
     if (socketRef.current) {
       socketRef.current.emit(ACTIONS.LEAVE, { roomId, username: uname });
+      intentionalDisconnectRef.current = true;
       socketRef.current.disconnect();
       socketRef.current = null;
     }
