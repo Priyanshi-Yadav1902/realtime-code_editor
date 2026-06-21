@@ -222,7 +222,8 @@ const EditorPage = () => {
       
       try { console.debug('Run requested', { roomId, socketId: socketRef.current?.id, language: 'javascript', code }); } catch (e) {}
       setRunOutput({ running: true });
-      const resp = await fetch((process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000') + '/run', {
+      const apiBase = process.env.REACT_APP_BACKEND_URL || window.location.origin;
+      const resp = await fetch(apiBase + '/run', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ language, code, socketId: socketRef.current?.id, username }),
       });

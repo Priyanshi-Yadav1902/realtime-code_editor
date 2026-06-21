@@ -19,12 +19,7 @@ app.use(express.json());
 
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3002",
-      "http://127.0.0.1:3000",
-      "http://127.0.0.1:3002",
-    ],
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
@@ -283,7 +278,11 @@ app.post("/run", async (req, res) => {
     res.status(500).json({ error: String(e) });
   }
 });
+app.use(express.static(path.join(__dirname, "build")));
 
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
 
 const PORT = process.env.PORT || 5000;
 const HOST = "0.0.0.0";

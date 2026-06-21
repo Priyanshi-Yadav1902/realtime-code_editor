@@ -98,7 +98,7 @@ const Editor = ({ socket, roomId, joined, onRegister }) => {
         emitTimeoutRef.current = null;
       }
     };
-  }, []); 
+  }, [onRegister, roomId]); 
   useEffect(() => {
     if (!socket) return;
     socketPropRef.current = socket;

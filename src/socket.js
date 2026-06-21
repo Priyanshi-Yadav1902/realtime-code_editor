@@ -1,9 +1,8 @@
-﻿import { io } from 'socket.io-client';
-
+import { io } from 'socket.io-client';
 
 export const initSocket = () => {
   const env = process.env.REACT_APP_BACKEND_URL;
-  const defaultHost = `${window.location.protocol}//${window.location.hostname}:5000`;
+  const defaultHost = window.location.origin;
   const url = env || defaultHost;
 
   const options = {
